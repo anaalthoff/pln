@@ -122,3 +122,67 @@ for frase, sentido in contextos:
     print(f"\nFrase: '{frase}'")
     print(f"  → Sentido esperado: {sentido}")
     print(f"  → Similaridade: {sim:.4f}")
+
+# Uma aplicação fundamental em sistemas de busca é calcular a similaridade entre documentos ou entre uma consulta e documentos
+from sklearn.metrics.pairwise import cosine_similarity
+
+def obter_vetor_documento(texto, nlp_model):
+    """Obtém o vetor médio de um documento."""
+    doc = nlp_model(texto)
+    if doc.has_vector:
+        return doc.vector
+    else:
+        # Se o modelo não tem vetor, retorna zeros
+        return np.zeros(nlp_model.vocab.vectors_length)
+
+# Carregar modelo com vetores
+nlp_sim = spacy.load("pt_core_news_md")
+
+# Documentos de exemplo
+consulta = "melhor restaurante italiano em São Paulo"
+
+documentos = [
+    "As 10 melhores pizzarias do bairro da Mooca",
+    "Culinária francesa e degustação de vinhos em Pinheiros",
+    "Massa artesanal e tiramisu autêntico servidos no centro",
+    "O melhor sushi e sashimi da Liberdade",
+    "Comida italiana perto da Avenida Paulista com ótimas avaliações"
+]
+
+print("=" * 60)
+print("6. SIMILARIDADE ENTRE CONSULTA E DOCUMENTOS (SISTEMAS DE BUSCA)")
+print("=" * 60)
+
+# Obter vetor da consulta
+vetor_consulta = obter_vetor_documento(consulta, nlp_sim)
+
+# Calcular similaridade com cada documento
+resultados = []
+for doc_texto in documentos:
+    vetor_doc = obter_vetor_documento(doc_texto, nlp_sim)
+    similaridade = cosine_similarity([vetor_consulta], [vetor_doc])[0][0]
+    resultados.append({
+        "Documento": doc_texto,
+        "Similaridade": similaridade
+    })
+
+# Ordenar por similaridade (maior para menor)
+resultados.sort(key=lambda x: x["Similaridade"], reverse=True)
+
+df_resultados = pd.DataFrame(resultados)
+print(f"\nConsulta: '{consulta}'\n")
+print(df_resultados.to_string(index=False))
+
+# Visualização em gráfico de barras
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 6))
+docs = [r["Documento"][:40] + "..." if len(r["Documento"]) > 40 else r["Documento"] for r in resultados]
+scores = [r["Similaridade"] for r in resultados]
+plt.barh(range(len(docs)), scores, color='skyblue')
+plt.yticks(range(len(docs)), docs)
+plt.xlabel("Similaridade por Cosseno")
+plt.title(f"Ranking de Documentos para Consulta: '{consulta}'")
+plt.gca().invert_yaxis()  # Melhor documento no topo
+plt.tight_layout()
+plt.show()
