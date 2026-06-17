@@ -66,3 +66,59 @@ print(df_entidades.to_string(index=False))
 print("\nVisualização textual das entidades:")
 for ent in doc_ner.ents:
     print(f"  - '{ent.text}' → {ent.label_} ({spacy.explain(ent.label_)})")
+
+# O spaCy também permite acesso a embeddings de palavras, que são representações vetoriais que capturam significado contextual
+import numpy as np
+
+# Carregar modelo de português com vetores
+nlp_pt = spacy.load("pt_core_news_lg")  # modelo grande com vetores
+
+# Palavra ambígua em português
+print("=" * 60)
+print("DESAMBIGUAÇÃO CONTEXTUAL: A palavra 'MANGA'")
+print("=" * 60)
+
+def similaridade_contextual(frase, palavra_alvo, sentido_referencia):
+    """Calcula similaridade entre o contexto da frase e um sentido de referência."""
+    doc = nlp_pt(frase)
+    
+    # Encontrar o token da palavra alvo
+    token_alvo = None
+    for token in doc:
+        if token.text.lower() == palavra_alvo:
+            token_alvo = token
+            break
+    
+    if token_alvo is None:
+        return 0.0
+    
+    # Calcular vetor médio do contexto (excluindo a palavra alvo)
+    vetores_contexto = []
+    for token in doc:
+        if token.text.lower() != palavra_alvo and token.has_vector:
+            vetores_contexto.append(token.vector)
+    
+    if not vetores_contexto:
+        return 0.0
+    
+    vetor_contexto = np.mean(vetores_contexto, axis=0)
+    
+    # Criar documento do sentido de referência
+    doc_referencia = nlp_pt(sentido_referencia)
+    
+    # Calcular similaridade por cosseno
+    similaridade = token_alvo.similarity(doc_referencia)
+    return similaridade
+
+# Testando diferentes contextos
+contextos = [
+    ("Comi uma manga suculenta no almoço", "fruta"),
+    ("A costureira usou a manga da camisa", "parte_roupa"),
+    ("O desenho tem traços de estilo manga", "estilo_quadrinho")
+]
+
+for frase, sentido in contextos:
+    sim = similaridade_contextual(frase, "manga", sentido)
+    print(f"\nFrase: '{frase}'")
+    print(f"  → Sentido esperado: {sentido}")
+    print(f"  → Similaridade: {sim:.4f}")
