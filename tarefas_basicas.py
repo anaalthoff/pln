@@ -37,3 +37,32 @@ print("=" * 60)
 lemas = [(token.text, token.lemma_) for token in doc_pt if not token.is_punct]
 df_lemas = pd.DataFrame(lemas, columns=["Palavra Original", "Lema"])
 print(df_lemas.to_string(index=False))
+
+# O NER identifica e classifica entidades como pessoas, organizações, locais, datas, etc.
+# Texto com entidades nomeadas
+texto_ner = "A Google anunciou hoje que João Silva, funcionário da Microsoft em São Paulo, receberá um bônus de R$ 10.000 em 15/12/2024."
+
+doc_ner = nlp_pt(texto_ner)
+
+print("=" * 60)
+print("4. RECONHECIMENTO DE ENTIDADES NOMEADAS (NER)")
+print("=" * 60)
+
+entidades = []
+for ent in doc_ner.ents:
+    entidades.append({
+        "Entidade": ent.text,
+        "Rótulo": ent.label_,
+        "Descrição": spacy.explain(ent.label_)
+    })
+
+df_entidades = pd.DataFrame(entidades)
+print(df_entidades.to_string(index=False))
+
+# Visualização interativa (funciona em Jupyter Notebook)
+# displacy.render(doc_ner, style="ent", jupyter=True)
+
+# Visualização textual
+print("\nVisualização textual das entidades:")
+for ent in doc_ner.ents:
+    print(f"  - '{ent.text}' → {ent.label_} ({spacy.explain(ent.label_)})")
