@@ -1,0 +1,39 @@
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dados / modelos (descomente se não quiser versionar)
+# data/
+# *.csv
+# *.pkl
+# *.model
+
+# NLTK / spaCy downloads locais
+nltk_data/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+
+# SO
+.DS_Store
+Thumbs.db
+
+# Variáveis de ambiente
+.env

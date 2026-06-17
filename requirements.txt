@@ -1,0 +1,10 @@
+# PLN / NLP - dependências base
+nltk
+spacy
+scikit-learn
+pandas
+numpy
+matplotlib
+
+# Notebooks (opcional)
+jupyter
