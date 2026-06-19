@@ -31,3 +31,19 @@ print("\n2. Tokenização com NLTK (word_tokenize):")
 print(tokens_nltk)
 
 # Saída esperada: ['Dr.', 'Paulo', ',', 'o', 'aluno', 'da', 'Ufba', ',', 'comprou', 'um', 'notebook', 'de', 'R$', '2.500,00', '?', 'Incrível', '!'
+
+# Tokenização Avançada com spaCy
+doc = nlp(frase_exemplo)
+tokens_spacy = [token.text for token in doc]
+print("\n3. Tokenização com spaCy:")
+print(tokens_spacy)
+# Saída esperada: ['Dr.', 'Paulo', ',', 'o', 'aluno', 'de', 'a', 'Ufba', ',', 'comprou', 'um', 'notebook', 'de', 'R$', '2.500,00', '?', 'Incrível', '!']
+
+# Análise detalhada de um token
+print("\n--- Análise Detalhada do Token 'da' (spaCy) ---")
+for token in doc:
+    if token.text == 'da':
+        print(f"Texto: '{token.text}', Lema: '{token.lemma_}', POS: '{token.pos_}'")
+        # Saída: Texto: 'da', Lema: 'de', POS: 'ADP'
+        # O spaCy já expandiu a contração 'da' em 'de' + 'a', mas mantém o texto original 'da'.
+        # A propriedade .lemma_ retorna a forma base ('de').
