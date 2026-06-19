@@ -88,4 +88,46 @@ class BuscaPLN:
         resultados.sort(key=lambda x: x[1], reverse=True)
         return resultados[:top_k]
     
-print("Deu certo")
+# ===== DEMONSTRAÇÃO DO SISTEMA DE BUSCA =====
+
+print("=" * 60)
+print("8. SISTEMA DE BUSCA COMPLETO COM PRÉ-PROCESSAMENTO")
+print("=" * 60)
+
+# Criar sistema de busca
+buscador = BuscaPLN(modelo_idioma="pt_core_news_sm")
+
+# Adicionar documentos (notícias fictícias)
+documentos_busca = [
+    "Google anuncia novo centro de pesquisa em inteligência artificial em São Paulo",
+    "Microsoft lança atualização do Windows com foco em segurança e privacidade",
+    "Apple apresenta novo iPhone com câmera de alta resolução e bateria de longa duração",
+    "Pesquisadores brasileiros desenvolvem algoritmo inovador para processamento de linguagem natural",
+    "Amazon expande operações de logística no Brasil com novos centros de distribuição",
+    "Universidade de São Paulo oferece curso gratuito sobre PLN e machine learning"
+]
+
+for i, doc in enumerate(documentos_busca):
+    buscador.adicionar_documento(doc, {"id": i, "fonte": "Notícias Tech"})
+
+# Realizar buscas
+consultas = [
+    "inteligência artificial no Brasil",
+    "novidades da Apple",
+    "curso de PLN gratuito"
+]
+
+for consulta in consultas:
+    print(f"\n--- Busca: '{consulta}' ---")
+    
+    # Busca semântica (com embeddings)
+    resultados_semanticos = buscador.buscar(consulta, top_k=2)
+    print("\n🔍 Busca Semântica (Embeddings):")
+    for doc, score in resultados_semanticos:
+        print(f"  Score: {score:.4f} | {doc['texto_original']}")
+    
+    # Busca por palavras-chave (tradicional)
+    resultados_keywords = buscador.buscar_por_palavras_chave(consulta, top_k=2)
+    print("\n🔎 Busca por Palavras-chave:")
+    for doc, score in resultados_keywords:
+        print(f"  Score: {score:.4f} | {doc['texto_original']}")
