@@ -186,3 +186,26 @@ plt.title(f"Ranking de Documentos para Consulta: '{consulta}'")
 plt.gca().invert_yaxis()  # Melhor documento no topo
 plt.tight_layout()
 plt.show()
+
+# Visualização da Árvore de Dependências Sintáticas
+print("=" * 60)
+print("7. ANÁLISE DE DEPENDÊNCIA SINTÁTICA")
+print("=" * 60)
+
+frase_exemplo = "O programador resolveu o bug complexo rapidamente."
+doc_dep = nlp_pt(frase_exemplo)
+
+# Visualização textual das dependências
+print(f"{'Token':<15} {'Dependência':<15} {'Cabeça':<15} {'Cabeça texto':<15} {'Filhos':<20}")
+print("-" * 80)
+
+for token in doc_dep:
+    filhos = [filho.text for filho in token.children]
+    print(f"{token.text:<15} {token.dep_:<15} {token.head.text:<15} {token.head.text:<15} {str(filhos):<20}")
+
+# Visualização interativa (funciona em Jupyter Notebook)
+# displacy.render(doc_dep, style="dep", jupyter=True, options={'distance': 120})
+
+print("\nNota: Para visualização gráfica da árvore, execute em um Jupyter Notebook:")
+print("  from spacy import displacy")
+print("  displacy.render(doc_dep, style='dep', jupyter=True)")
