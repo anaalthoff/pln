@@ -21,3 +21,13 @@ print(tokens_espacos)
 
 # Saída: ['Dr.', 'Paulo,', 'o', 'aluno', 'da', 'Ufba,', 'comprou', 'um', 'notebook', 'de', 'R$', '2.500,00?', 'Incrível!']
 # Problemas: Pontuação (',', '?', '!') grudada nas palavras.
+
+# O word_tokenize do NLTK já separa pontuação, mas não lida bem com contrações e abreviações em português por padrão (o modelo punkt é treinado majoritariamente para inglês). Ele trata "Dr." como uma palavra e "da" como um token único.
+
+nltk.download('punkt_tab')
+# Tokenização NLTK (já separa pontuação)
+tokens_nltk = word_tokenize(frase_exemplo, language='portuguese')
+print("\n2. Tokenização com NLTK (word_tokenize):")
+print(tokens_nltk)
+
+# Saída esperada: ['Dr.', 'Paulo', ',', 'o', 'aluno', 'da', 'Ufba', ',', 'comprou', 'um', 'notebook', 'de', 'R$', '2.500,00', '?', 'Incrível', '!'
