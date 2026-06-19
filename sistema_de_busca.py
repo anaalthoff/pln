@@ -6,6 +6,7 @@ from spacy import displacy
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import matplotlib.pyplot as plt
 
 class BuscaPLN:
     """Sistema simples de busca com pré-processamento usando spaCy."""
@@ -131,3 +132,47 @@ for consulta in consultas:
     print("\n🔎 Busca por Palavras-chave:")
     for doc, score in resultados_keywords:
         print(f"  Score: {score:.4f} | {doc['texto_original']}")
+
+# Para entender melhor como os embeddings representam documentos, segue projeção em 2D usando t-SNE
+from sklearn.manifold import TSNE
+
+print("=" * 60)
+print("9. VISUALIZAÇÃO DOS EMBEDDINGS EM 2D (t-SNE)")
+print("=" * 60)
+
+# Coletar embeddings e textos
+embeddings_lista = []
+textos_lista = []
+
+for doc in buscador.documentos:
+    if doc["embedding"] is not None:
+        embeddings_lista.append(doc["embedding"])
+        textos_lista.append(doc["texto_original"][:50])  # Abreviar para legenda
+
+if len(embeddings_lista) > 1:
+    # Aplicar t-SNE para reduzir para 2 dimensões
+    tsne = TSNE(n_components=2, random_state=42, perplexity=min(30, len(embeddings_lista)-1))
+    embeddings_2d = tsne.fit_transform(np.array(embeddings_lista))
+    
+    # Plotar
+    plt.figure(figsize=(12, 8))
+    plt.scatter(embeddings_2d[:, 0], embeddings_2d[:, 1], s=100, alpha=0.7)
+    
+    # Adicionar labels
+    for i, texto in enumerate(textos_lista):
+        plt.annotate(texto[:30] + "...", 
+                    xy=(embeddings_2d[i, 0], embeddings_2d[i, 1]),
+                    xytext=(5, 5), textcoords='offset points',
+                    fontsize=8, alpha=0.8)
+    
+    plt.title("Visualização de Documentos em Espaço 2D (t-SNE)")
+    plt.xlabel("Dimensão 1")
+    plt.ylabel("Dimensão 2")
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+    
+    print("\nDocumentos semanticamente similares ficam próximos neste espaço.")
+    print("Note como documentos sobre tecnologia (Google, Microsoft, Apple) tendem a formar clusters.")
+else:
+    print("Número insuficiente de documentos com embeddings para visualização.")
