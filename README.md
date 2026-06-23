@@ -8,6 +8,7 @@ Projeto da disciplina de **Inteligência Artificial** (5º semestre — UDESC), 
 - [NLTK](https://www.nltk.org/) — toolkit clássico de PLN
 - [spaCy](https://spacy.io/) — PLN industrial (tokenização, POS, NER)
 - [scikit-learn](https://scikit-learn.org/) — machine learning
+- [sentence-transformers](https://www.sbert.net/) — embeddings de sentenças (modelos multilíngues)
 - [pandas](https://pandas.pydata.org/) / [NumPy](https://numpy.org/) — manipulação de dados
 - [matplotlib](https://matplotlib.org/) — visualização
 - [Jupyter](https://jupyter.org/) — notebooks
@@ -97,7 +98,11 @@ Assim qualquer pessoa que clonar o projeto consegue reproduzir o mesmo ambiente 
 
 ```
 pln/
-├── .gitignore         # arquivos ignorados pelo Git (inclui .venv/)
-├── README.md          # este arquivo
-└── requirements.txt   # dependências do projeto
+├── .gitignore                       # arquivos ignorados pelo Git (inclui .venv/)
+├── README.md                        # este arquivo
+├── requirements.txt                 # dependências do projeto
+├── tokenizacao.py                   # tokenização com NLTK e spaCy
+├── tarefas_basicas.py               # tarefas básicas de PLN (POS, NER, similaridade)
+├── stop_words_e_normalizacao.py     # stop words, normalização e embeddings
+└── sistema_de_busca.py              # sistema de busca semântica (similaridade + t-SNE)
 ```
