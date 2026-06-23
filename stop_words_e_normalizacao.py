@@ -92,3 +92,16 @@ for nome, dados in resultados.items():
     print(f"Frase1: {dados['p1']}")
     print(f"Frase2: {dados['p2']}")
     print(f"Similaridade de Cosseno: {dados['sim']:.4f}")
+
+# Cria um gráfico de barras
+labels = list(resultados.keys())
+similaridades = [dados["sim"] for dados in resultados.values()]
+
+plt.figure(figsize=(8, 5))
+plt.bar(labels, similaridades, color=['#1f77b4', '#ff7f0e', '#2ca02c'])
+plt.ylabel('Similaridade de Cosseno')
+plt.title('Impacto do Pré-processamento na Similaridade Semântica')
+plt.ylim(0, 1)
+for i, v in enumerate(similaridades):
+    plt.text(i, v + 0.02, f"{v:.3f}", ha='center', fontweight='bold')
+plt.show()
