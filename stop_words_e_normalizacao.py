@@ -58,3 +58,37 @@ frase_sem_preprocess = preprocessar_texto(frase_original, remover_stopwords=Fals
 print("Original:", frase_original)
 print("Sem stopwords e lematizado:", frase_sem_stopwords)
 print("Apenas normalizado (sem remoção de stopwords):", frase_sem_preprocess)
+
+# Impacto na Similaridade Semântica
+# Vamos comparar como diferentes níveis de pré-processamento afetam a similaridade entre duas frases semanticamente próximas, mas com estruturas diferentes.
+# Frases de exemplo
+frase1 = "O médico operou o paciente com sucesso."
+frase2 = "A cirurgia realizada pelo doutor no enfermo foi bem-sucedida."
+
+# Aplica diferentes níveis de pré-processamento
+# Caso A: Sem pré-processamento (texto bruto)
+# Caso B: Com normalização e lematização, mas com stopwords
+# Caso C: Com normalização, lematização e remoção de stopwords
+
+preprocess_casos = {
+    "A - Bruto": lambda x: x,
+    "B - Normalizado (c/ stopwords)": lambda x: preprocessar_texto(x, remover_stopwords=False, lematizar=True),
+    "C - Normalizado (s/ stopwords)": lambda x: preprocessar_texto(x, remover_stopwords=True, lematizar=True)
+}
+
+# Calcula embeddings e similaridade de cosseno
+resultados = {}
+for nome, func in preprocess_casos.items():
+    p1 = func(frase1)
+    p2 = func(frase2)
+    emb1 = modelo_embedding.encode(p1, convert_to_tensor=True)
+    emb2 = modelo_embedding.encode(p2, convert_to_tensor=True)
+    similaridade = util.pytorch_cos_sim(emb1, emb2).item()
+    resultados[nome] = {"sim": similaridade, "p1": p1, "p2": p2}
+
+# Exibe resultados
+for nome, dados in resultados.items():
+    print(f"\n--- {nome} ---")
+    print(f"Frase1: {dados['p1']}")
+    print(f"Frase2: {dados['p2']}")
+    print(f"Similaridade de Cosseno: {dados['sim']:.4f}")
