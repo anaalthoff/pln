@@ -5,6 +5,7 @@ scikit-learn
 pandas
 numpy
 matplotlib
+sentence-transformers
 
 # Notebooks (opcional)
 jupyter
