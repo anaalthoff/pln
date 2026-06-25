@@ -65,3 +65,18 @@ for nome, textos in versoes.items():
 print("Similaridade (Frase1 x Frase2) por tipo de normalização:")
 for nome, sim in resultados.items():
     print(f"{nome}: {sim:.4f}")
+
+import matplotlib.pyplot as plt
+
+nomes = list(resultados.keys())
+similaridades = list(resultados.values())
+
+plt.figure(figsize=(8, 5))
+cores = ['#1f77b4', '#ff7f0e', '#2ca02c']
+plt.bar(nomes, similaridades, color=cores)
+plt.ylabel('Similaridade de Cosseno (TF-IDF)')
+plt.title('Impacto do Stemming e Lematização na Similaridade entre Frases')
+plt.ylim(0, 1)
+for i, v in enumerate(similaridades):
+    plt.text(i, v + 0.02, f"{v:.3f}", ha='center', fontweight='bold')
+plt.show()
