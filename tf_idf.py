@@ -34,3 +34,31 @@ print(f"Tamanho do vocabulário (número de termos únicos): {matriz_tfidf.shape
 print(f"Exemplo de termos encontrados: {vectorizer.get_feature_names_out()[:10]}")
 print(f"\nMatriz TF-IDF (amostra densa, mas ela é esparsa):")
 print(matriz_tfidf.toarray())
+
+# 5. Calcula a matriz de similaridade por cosseno entre todos os documentos
+similaridade = cosine_similarity(matriz_tfidf)
+
+print("\n" + "=" * 60)
+print("MATRIZ DE SIMILARIDADE POR COSSENO (Documento x Documento)")
+print("=" * 60)
+print("Linha i, Coluna j = Similaridade entre Documento i e Documento j")
+print(np.round(similaridade, 3))
+
+# 6. Visualização dos resultados em 2D com PCA
+pca = PCA(n_components=2)
+matriz_2d = pca.fit_transform(matriz_tfidf.toarray())
+
+plt.figure(figsize=(10, 8))
+colors = ['red', 'blue', 'green', 'orange', 'purple']
+for i, doc in enumerate(documentos):
+    nome_doc = f"Doc {i+1}"
+    plt.scatter(matriz_2d[i, 0], matriz_2d[i, 1], c=colors[i], s=100, label=nome_doc)
+    plt.annotate(nome_doc, (matriz_2d[i, 0] + 0.02, matriz_2d[i, 1] + 0.02), fontsize=12)
+
+plt.title("Visualização 2D de Documentos no Espaço TF-IDF (PCA)")
+plt.xlabel("Componente Principal 1")
+plt.ylabel("Componente Principal 2")
+plt.legend()
+plt.grid(True)
+plt.show()
+
