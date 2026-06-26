@@ -289,3 +289,112 @@ plt.tight_layout()
 plt.show()
 
 print("\n✓ Visualização concluída!")
+
+# ============================================================
+# PARTE 5: COMPARAÇÃO CONCEITUAL - ESTÁTICO vs. CONTEXTUAL
+# ============================================================
+print("\n" + "=" * 70)
+print("PARTE 5: Comparação Conceitual - Embeddings Estáticos vs. Contextuais")
+print("=" * 70)
+
+print("""
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    EMBEDDINGS ESTÁTICOS (Word2Vec, GloVe)                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ • Uma palavra → UM ÚNICO vetor (independente do contexto)                   │
+│ • 'banco' (assento) e 'banco' (financeiro) têm o MESMO vetor               │
+│ • Não resolve o problema da POLISSEMIA                                      │
+│ • Vantagem: RÁPIDO (simples lookup em tabela)                               │
+│ • Desvantagem: Não captura nuances contextuais                              │
+│                                                                             │
+│ Exemplo:                                                                    │
+│   'banco' → [0.2, -0.5, 0.8, 0.1, ...]  (vetor ÚNICO para TODOS os usos)  │
+│   Similaridade entre os dois sentidos = 1.0 (idênticos!)                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    EMBEDDINGS CONTEXTUAIS (BERT, ELMo, GPT)                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ • Uma palavra → VETOR DIFERENTE para cada contexto                          │
+│ • 'banco' (assento) e 'banco' (financeiro) têm vetores DIFERENTES          │
+│ • RESOLVE o problema da POLISSEMIA                                          │
+│ • Vantagem: Captura nuances contextuais                                     │
+│ • Desvantagem: MAIS LENTO (requer passagem pela rede neural)               │
+│                                                                             │
+│ Exemplo (BERT):                                                             │
+│   'banco' (assento) → [0.8, -0.2, 0.1, -0.5, ...]                          │
+│   'banco' (financeiro) → [-0.3, 0.7, -0.1, 0.4, ...]                       │
+│   Similaridade entre os dois sentidos ≈ 0.62 (diferentes!)                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+""")
+
+# ============================================================
+# PARTE 6: RESUMO DOS RESULTADOS
+# ============================================================
+print("\n" + "=" * 70)
+print("RESUMO DOS RESULTADOS")
+print("=" * 70)
+
+print(f"""
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. SIMILARIDADE ENTRE FRASES (Sentence-Transformers)                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ • Frases com MESMO significado (F1 e F2): similaridade = {sim_f1_f2:.4f}     │
+│ • Frases com significado RELACIONADO (F1 e F6): similaridade = {sim_f1_f6:.4f} │
+│ • Frases com SIGNIFICADOS DIFERENTES (F1 e F3): similaridade = {sim_f1_f3:.4f} │
+│                                                                             │
+│ ✓ O modelo captura similaridade SEMÂNTICA, não apenas lexical!              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 2. DISTINÇÃO DE SENTIDOS (BERTimbau)                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ • Similaridade entre os dois sentidos de 'banco': {sim_banco:.4f}            │
+│                                                                             │
+│ ✓ O BERT gerou embeddings DIFERENTES para os dois contextos!                │
+│ ✓ Isso resolve o problema da POLISSEMIA que afeta embeddings estáticos      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 3. IMPLICAÇÕES PRÁTICAS                                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ • Busca semântica: encontrar documentos por SIGNIFICADO, não por palavras   │
+│ • Chatbots: entender a INTENÇÃO do usuário mesmo com palavras diferentes    │
+│ • Análise de sentimentos: capturar IRONIA e SARCASMO                        │
+│ • Tradução automática: gerar traduções mais NATURAIS e CONTEXTUAIS          │
+└─────────────────────────────────────────────────────────────────────────────┘
+""")
+
+# ============================================================
+# EXTRA: Informações sobre os modelos utilizados
+# ============================================================
+print("\n" + "=" * 70)
+print("INFORMAÇÕES SOBRE OS MODELOS UTILIZADOS")
+print("=" * 70)
+
+print("""
+Modelo 1: paraphrase-multilingual-MiniLM-L12-v2 (Sentence-Transformers)
+├── Arquitetura: MiniLM (versão leve do BERT)
+├── Dimensão do embedding: 384
+├── Suporte multilíngue: 50+ línguas (incluindo português)
+├── Tamanho: ~120 MB
+├── Uso: Similaridade semântica entre FRASES
+└── Licença: Apache 2.0
+
+Modelo 2: neuralmind/bert-base-portuguese-cased (BERTimbau)
+├── Arquitetura: BERT-base (12 camadas, 12 heads, 110M parâmetros)
+├── Dimensão do embedding: 768
+├── Treinado especificamente para português brasileiro
+├── Tamanho: ~420 MB
+├── Dados de treino: brWaC (2.68B tokens)
+├── Uso: Embeddings contextuais para PALAVRAS
+└── Licença: MIT
+
+Diferença fundamental:
+└── Sentence-Transformer é OTIMIZADO para similaridade entre frases
+└── BERTimbau é um modelo BERT GENÉRICO, bom para embeddings de palavras
+""")
+
+print("\n" + "=" * 70)
+print("FIM DO EXEMPLO COMPUTACIONAL")
+print("=" * 70)
