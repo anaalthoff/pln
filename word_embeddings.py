@@ -60,3 +60,38 @@ print(similaridades)
 print(f"\nSimilaridade (Frase 0, Frase 1): {similaridades[0][1]:.4f}")
 print(f"Similaridade (Frase 0, Frase 2): {similaridades[0][2]:.4f}")
 print("A maior similaridade entre 'médico/operou/paciente' e 'cirurgião/realizou/cirurgia' demonstra a captura semântica, apesar das palavras serem diferentes!")
+
+# 4. EXEMPLO 3: VISUALIZAÇÃO DE EMBEDDINGS (t-SNE)
+print("\n--- Visualização de Embeddings de Palavras (t-SNE) ---")
+palavras_vis = ["rei", "rainha", "homem", "mulher", "principe", "princesa",
+                "carro", "automovel", "caminhao", "moto", "computador", "notebook"]
+# Obtém vetores apenas para palavras que existem no vocabulário do spaCy
+vetores_validos = []
+palavras_validas = []
+for p in palavras_vis:
+    token = nlp(p)
+    if token.has_vector:
+        vetores_validos.append(token.vector)
+        palavras_validas.append(p)
+    else:
+        print(f"Palavra '{p}' não encontrada no vocabulário.")
+
+if len(vetores_validos) > 1:
+    # Aplica t-SNE para reduzir de 300 dimensões para 2D
+    tsne = TSNE(n_components=2, random_state=42, perplexity=3)
+    vetores_2d = tsne.fit_transform(np.array(vetores_validos))
+
+    # Cria o gráfico
+    plt.figure(figsize=(10, 8))
+    for i, palavra in enumerate(palavras_validas):
+        x, y = vetores_2d[i, 0], vetores_2d[i, 1]
+        plt.scatter(x, y, marker='x', color='red')
+        plt.text(x + 0.5, y + 0.5, palavra, fontsize=12)
+    plt.title("Visualização de Embeddings de Palavras (t-SNE)")
+    plt.xlabel("Dimensão 1")
+    plt.ylabel("Dimensão 2")
+    plt.grid(True)
+    plt.show()
+    print("Observe no gráfico como palavras com relações semânticas (ex: rei/rainha, carro/automovel) tendem a formar clusters próximos.")
+else:
+    print("Não há vetores suficientes para visualização.")
