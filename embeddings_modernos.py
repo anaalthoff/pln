@@ -221,3 +221,71 @@ for i, j, descricao in pares_para_comparar:
         print("  → Interpretação: FRASES SEMANTICAMENTE RELACIONADAS")
     else:
         print("  → Interpretação: FRASES SEMANTICAMENTE DISTANTES")
+
+
+# ============================================================
+# PARTE 4: VISUALIZAÇÃO t-SNE (CORRIGIDA - VERSÃO FINAL)
+# ============================================================
+print("\n" + "=" * 70)
+print("PARTE 4: Visualização t-SNE dos Embeddings")
+print("=" * 70)
+print("Reduzindo embeddings de alta dimensão (384D) para 2D para visualização")
+print("-" * 70)
+
+# Estratégia: Vamos visualizar APENAS os embeddings do SentenceTransformer
+# que já são todos da mesma dimensionalidade (384)
+print("\nPreparando dados para visualização...")
+
+# Usa apenas os embeddings do SentenceTransformer (todos 384 dims)
+vetores_para_tsne = np.array(embeddings)  # shape: (6, 384)
+labels_tsne = [f"Frase {i+1}" for i in range(len(frases))]
+
+print(f"  → {len(vetores_para_tsne)} embeddings, cada um com {vetores_para_tsne.shape[1]} dimensões")
+
+# Aplica t-SNE para reduzir para 2D
+# Ajusta perplexity para não exceder o número de amostras
+perplexity_val = min(5, len(vetores_para_tsne) - 1)
+print(f"  → Perplexity do t-SNE: {perplexity_val}")
+
+print("\nAplicando t-SNE (isso pode levar alguns segundos)...")
+tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity_val, 
+            n_iter=1000, learning_rate='auto')
+vetores_2d = tsne.fit_transform(vetores_para_tsne)
+
+# Cria o gráfico de visualização
+plt.figure(figsize=(12, 8))
+
+# Cores personalizadas para cada frase
+cores = ['#1f77b4', '#1f77b4', '#ff7f0e', '#2ca02c', '#2ca02c', '#1f77b4']
+tamanhos = [150, 150, 150, 150, 150, 150]
+
+for i, label in enumerate(labels_tsne):
+    x, y = vetores_2d[i, 0], vetores_2d[i, 1]
+    plt.scatter(x, y, marker='o', color=cores[i], s=tamanhos[i], 
+                alpha=0.7, edgecolors='black', linewidth=1.5)
+    plt.text(x + 0.05, y + 0.05, label, fontsize=11, fontweight='bold',
+             bbox=dict(facecolor='white', alpha=0.8, edgecolor='none', pad=2))
+
+# Adiciona anotações para destacar grupos semânticos
+plt.annotate('Grupo: Medicina/Cirurgia', 
+             xy=(vetores_2d[0, 0], vetores_2d[0, 1]),
+             xytext=(vetores_2d[0, 0] + 2, vetores_2d[0, 1] + 2),
+             fontsize=10, style='italic',
+             arrowprops=dict(arrowstyle='->', color='gray', alpha=0.5))
+
+plt.annotate('Grupo: Animais', 
+             xy=(vetores_2d[3, 0], vetores_2d[3, 1]),
+             xytext=(vetores_2d[3, 0] + 2, vetores_2d[3, 1] + 1),
+             fontsize=10, style='italic',
+             arrowprops=dict(arrowstyle='->', color='gray', alpha=0.5))
+
+plt.title("Visualização de Embeddings Semânticos de Frases (t-SNE)\n" +
+          "Sentence-Transformers Multilíngue", 
+          fontsize=14, fontweight='bold')
+plt.xlabel("Dimensão 1 (t-SNE)", fontsize=12)
+plt.ylabel("Dimensão 2 (t-SNE)", fontsize=12)
+plt.grid(True, alpha=0.3, linestyle='--')
+plt.tight_layout()
+plt.show()
+
+print("\n✓ Visualização concluída!")
