@@ -192,3 +192,32 @@ else:
     print("\n⚠ OBSERVAÇÃO: Similaridade ALTA")
     print("  → Neste caso específico, o BERT pode ter tido dificuldade em distinguir")
     print("  → Isso pode acontecer dependendo do contexto e do modelo")
+
+# ============================================================
+# PARTE 3: COMPARAÇÃO ENTRE EMBEDDINGS DE FRASES
+# ============================================================
+print("\n" + "=" * 70)
+print("PARTE 3: Comparação entre Embeddings de Frases")
+print("=" * 70)
+
+# Seleciona algumas frases para comparação detalhada
+pares_para_comparar = [
+    (0, 1, "F1 vs F2: médico/operou ↔ cirurgião/realizou cirurgia"),
+    (0, 2, "F1 vs F3: médico ↔ advogado (domínios diferentes)"),
+    (0, 5, "F1 vs F6: médico/operou ↔ médico/examinou (variação lexical)"),
+    (3, 4, "F4 vs F5: gato ↔ cachorro (animais domésticos)")
+]
+
+print("\nComparações detalhadas de similaridade semântica:")
+print("-" * 70)
+
+for i, j, descricao in pares_para_comparar:
+    sim = similaridades[i][j]
+    print(f"\n{descricao}")
+    print(f"  → Similaridade: {sim:.4f}")
+    if sim > 0.7:
+        print("  → Interpretação: FRASES SEMANTICAMENTE MUITO PRÓXIMAS")
+    elif sim > 0.5:
+        print("  → Interpretação: FRASES SEMANTICAMENTE RELACIONADAS")
+    else:
+        print("  → Interpretação: FRASES SEMANTICAMENTE DISTANTES")
