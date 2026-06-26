@@ -115,3 +115,80 @@ print(f"\n5. Similaridade (F2, F3): {sim_f2_f3:.4f}")
 print(f"   → '{frases[1]}' (cirurgia)")
 print(f"   → '{frases[2]}' (direito)")
 print(f"   → Análise: Similaridade BAIXA (domínios diferentes)")
+
+# ============================================================
+# PARTE 2: BERTimbau - Embeddings Contextuais para Palavras
+# ============================================================
+print("\n" + "=" * 70)
+print("PARTE 2: BERTimbau (BERT para Português Brasileiro)")
+print("=" * 70)
+print("Demonstrando que BERT gera embeddings DIFERENTES para a mesma palavra")
+print("em contextos diferentes (resolvendo o problema da polissemia)")
+print("-" * 70)
+
+# Carrega modelo BERTimbau-base (Souza et al., 2020)
+print("\nCarregando BERTimbau... (pode levar 1-2 minutos na primeira execução)")
+tokenizer = AutoTokenizer.from_pretrained("neuralmind/bert-base-portuguese-cased")
+model = AutoModel.from_pretrained("neuralmind/bert-base-portuguese-cased")
+model.to(device)
+model.eval()
+print("✓ BERTimbau carregado com sucesso!")
+
+# Frase com duas ocorrências de "banco" com sentidos diferentes
+frase_exemplo = "O banco do jardim estava quebrado, mas fui ao banco sacar dinheiro."
+
+print(f"\nFrase de exemplo: \"{frase_exemplo}\"")
+print("\nEsta frase contém a palavra 'banco' em DOIS sentidos diferentes:")
+print("  → Primeiro 'banco': assento de jardim")
+print("  → Segundo 'banco': instituição financeira")
+
+# Tokeniza a frase
+tokens = tokenizer(frase_exemplo, return_tensors="pt", return_token_type_ids=False)
+tokens = {k: v.to(device) for k, v in tokens.items()}
+
+print("\nTokenização (subpalavras):")
+tokens_decodificados = tokenizer.convert_ids_to_tokens(tokens['input_ids'][0])
+for i, token in enumerate(tokens_decodificados):
+    # Destaca as ocorrências de 'banco'
+    if token == 'banco':
+        print(f"  {i:2d}: [{token}] ← POSIÇÃO DA PALAVRA 'BANCO'")
+    else:
+        print(f"  {i:2d}: {token}")
+
+# Obtém embeddings da última camada
+with torch.no_grad():
+    outputs = model(**tokens)
+    embeddings_bert = outputs.last_hidden_state[0].cpu().numpy()  # [seq_len, 768]
+
+print(f"\nShape dos embeddings BERT: {embeddings_bert.shape}")
+print(f"  → {embeddings_bert.shape[0]} tokens × {embeddings_bert.shape[1]} dimensões")
+
+# Encontra as posições da palavra "banco"
+posicoes_banco = [i for i, token in enumerate(tokens_decodificados) if token == 'banco']
+print(f"\nPosições da palavra 'banco' na sequência: {posicoes_banco}")
+
+# Extrai os embeddings das duas ocorrências
+embedding_banco1 = embeddings_bert[posicoes_banco[0]]  # primeiro 'banco' (assento)
+embedding_banco2 = embeddings_bert[posicoes_banco[1]]  # segundo 'banco' (financeiro)
+
+print(f"\nEmbedding 1 (primeiro 'banco' - contexto: jardim/quebrado): shape {embedding_banco1.shape}")
+print(f"Embedding 2 (segundo 'banco' - contexto: sacar/dinheiro): shape {embedding_banco2.shape}")
+
+# Calcula similaridade entre as duas ocorrências
+sim_banco = cosine_similarity([embedding_banco1], [embedding_banco2])[0][0]
+
+print("\n" + "-" * 70)
+print("RESULTADO - COMPARAÇÃO DOS EMBEDDINGS DE 'BANCO'")
+print("-" * 70)
+print(f"\nSimilaridade do cosseno entre as duas ocorrências de 'banco': {sim_banco:.4f}")
+
+if sim_banco < 0.7:
+    print("\n✓ CONCLUSÃO: Similaridade MODERADA a BAIXA!")
+    print("  → O BERT conseguiu DISTINGUIR os dois sentidos da palavra!")
+    print("  → O embedding para 'banco (assento)' é DIFERENTE do embedding para")
+    print("    'banco (instituição financeira)'")
+    print("  → Isso resolve o problema da POLISSEMIA que afeta embeddings estáticos")
+else:
+    print("\n⚠ OBSERVAÇÃO: Similaridade ALTA")
+    print("  → Neste caso específico, o BERT pode ter tido dificuldade em distinguir")
+    print("  → Isso pode acontecer dependendo do contexto e do modelo")
