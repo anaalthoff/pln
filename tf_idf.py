@@ -62,3 +62,20 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
+# 7. Função de busca simples
+def buscar_documento(consulta, top_n=2):
+    vetor_consulta = vectorizer.transform([consulta])
+    similaridades = cosine_similarity(vetor_consulta, matriz_tfidf).flatten()
+    indices_top = np.argsort(similaridades)[::-1][:top_n]
+    
+    print("\n" + "=" * 60)
+    print(f"RESULTADOS DA BUSCA POR: '{consulta}'")
+    print("=" * 60)
+    for idx in indices_top:
+        print(f"Documento {idx+1}: '{documentos[idx]}'")
+        print(f"Similaridade: {similaridades[idx]:.4f}\n")
+
+# Exemplo de busca
+buscar_documento("aprendizado de máquina com computadores")
+buscar_documento("transporte autônomo elétrico")
+buscar_documento("clima ensolarado")
