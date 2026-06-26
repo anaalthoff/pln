@@ -248,8 +248,8 @@ perplexity_val = min(5, len(vetores_para_tsne) - 1)
 print(f"  → Perplexity do t-SNE: {perplexity_val}")
 
 print("\nAplicando t-SNE (isso pode levar alguns segundos)...")
-tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity_val, 
-            n_iter=1000, learning_rate='auto')
+tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity_val,
+            max_iter=1000, learning_rate='auto')
 vetores_2d = tsne.fit_transform(vetores_para_tsne)
 
 # Cria o gráfico de visualização
