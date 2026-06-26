@@ -40,3 +40,23 @@ sim_carro_gato = cosine_similarity(carro_vec, gato_vec)[0][0]
 print(f"Similaridade ('carro', 'automóvel'): {sim_carro_automovel:.4f}")
 print(f"Similaridade ('carro', 'gato'): {sim_carro_gato:.4f}")
 print("Observação: 'carro' e 'automóvel' são muito mais similares, como esperado pela Hipótese Distribucional!")
+
+# 3. EXEMPLO 2: SIMILARIDADE ENTRE FRASES (SENTENCE TRANSFORMERS)
+print("\n--- Similaridade entre Frases (SentenceTransformer) ---")
+frases = [
+    "O médico operou o paciente.",
+    "O cirurgião realizou a cirurgia.",
+    "O advogado leu o contrato."
+]
+
+# Gera os embeddings das frases (vetores densos)
+embeddings_frases = modelo_frases.encode(frases)
+
+# Calcula a matriz de similaridade entre todas as frases
+similaridades = cosine_similarity(embeddings_frases)
+
+print("Matriz de Similaridade (frase 0, 1, 2):")
+print(similaridades)
+print(f"\nSimilaridade (Frase 0, Frase 1): {similaridades[0][1]:.4f}")
+print(f"Similaridade (Frase 0, Frase 2): {similaridades[0][2]:.4f}")
+print("A maior similaridade entre 'médico/operou/paciente' e 'cirurgião/realizou/cirurgia' demonstra a captura semântica, apesar das palavras serem diferentes!")
