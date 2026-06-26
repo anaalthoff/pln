@@ -6,6 +6,8 @@ pandas
 numpy
 matplotlib
 sentence-transformers
+transformers
+torch
 
 # Notebooks (opcional)
 jupyter
