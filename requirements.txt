@@ -9,3 +9,19 @@ sentence-transformers
 
 # Notebooks (opcional)
 jupyter
+
+# ----------------------------------------------------------------------
+# Passos de pós-instalação (NÃO são pacotes pip — rodar manualmente)
+# ----------------------------------------------------------------------
+#
+# 1) Modelos de idioma do spaCy (português):
+#    python -m spacy download pt_core_news_sm
+#    python -m spacy download pt_core_news_md
+#    python -m spacy download pt_core_news_lg   # inclui vetores (word embeddings)
+#
+# 2) Dados do NLTK (rodar no Python):
+#    import nltk
+#    nltk.download('punkt')
+#    nltk.download('punkt_tab')   # NLTK >= 3.8.2
+#    nltk.download('stopwords')
+#    nltk.download('rslp')        # stemmer para português
