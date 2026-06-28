@@ -87,3 +87,20 @@ plt.ylabel('Componente Principal 2')
 plt.legend()
 plt.grid(True)
 plt.show()
+
+# --- ANÁLISE DOS RESULTADOS ---
+print("\n" + "="*50)
+print("4. ANÁLISE DOS RESULTADOS")
+print("="*50)
+print("""
+**Análise TF-IDF:** A similaridade entre a consulta e o documento relevante (Doc1) foi baixa.
+Isso ocorre porque TF-IDF compara palavras literalmente. Ele não reconhece que
+'ataque cardiaco' e 'infarto do miocardio' são conceitos relacionados. O Doc2
+provavelmente teve similaridade zero, pois não compartilha nenhuma palavra.
+
+**Análise Semântica:** O modelo de embeddings conseguiu capturar a relação semântica
+entre 'ataque cardiaco' e 'infarto', resultando em uma similaridade de cosseno muito
+mais alta (próxima a 0.7). O Doc2, sobre Python, recebeu uma similaridade muito baixa
+(próxima a 0.1). O gráfico 2D mostra claramente a consulta e o Doc1 próximos no
+espaço vetorial, enquanto o Doc2 está em uma região completamente diferente.
+""")
