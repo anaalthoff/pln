@@ -139,3 +139,39 @@ print(f"\n7. Similaridade (F1, F9): {sim_f1_f9:.4f}")
 print(f"   → '{frases[0]}' (operação)")
 print(f"   → '{frases[8]}' (cirurgia foi sucesso)")
 print(f"   → Análise: Similaridade MÉDIA-ALTA (relacionado, mas não igual)")
+
+# ============================================================
+# PARTE 2: COMPARAÇÃO COM TF-IDF (LINHA DE BASE)
+# ============================================================
+print("\n" + "=" * 70)
+print("PARTE 2: Comparação com TF-IDF (Linha de Base Léxica)")
+print("=" * 70)
+
+# Cria vetorizador TF-IDF
+vectorizer_tfidf = TfidfVectorizer(lowercase=True, token_pattern=r'(?u)\b\w+\b')
+
+# Calcula matriz TF-IDF
+tfidf_matrix = vectorizer_tfidf.fit_transform(frases)
+
+# Calcula similaridade do cosseno TF-IDF
+similaridades_tfidf = cosine_similarity(tfidf_matrix)
+
+print("\nMatriz de Similaridade (TF-IDF) - valores selecionados:")
+print(f"Similaridade (F1, F2) TF-IDF: {similaridades_tfidf[0][1]:.4f}")
+print(f"Similaridade (F1, F3) TF-IDF: {similaridades_tfidf[0][2]:.4f}")
+print(f"Similaridade (F1, F7) TF-IDF: {similaridades_tfidf[0][6]:.4f}")
+
+print("\n" + "-" * 70)
+print("COMPARAÇÃO SBERT vs. TF-IDF")
+print("-" * 70)
+
+print("\n┌───────────────────────────────┬─────────────┬─────────────┐")
+print("│ Par de Frases                 │   SBERT     │   TF-IDF    │")
+print("├───────────────────────────────┼─────────────┼─────────────┤")
+print(f"│ F1 × F2 (paráfrase)           │ {sim_f1_f2:.4f}      │ {similaridades_tfidf[0][1]:.4f}      │")
+print(f"│ F1 × F3 (paráfrase)           │ {sim_f1_f3:.4f}      │ {similaridades_tfidf[0][2]:.4f}      │")
+print(f"│ F1 × F7 (voz passiva)         │ {sim_f1_f7:.4f}      │ {similaridades_tfidf[0][6]:.4f}      │")
+print("└───────────────────────────────┴─────────────┴─────────────┘")
+
+print("\n✓ CONCLUSÃO: SBERT captura similaridade SEMÂNTICA onde TF-IDF falha")
+print("  (sobreposição lexical zero ou baixa)")
