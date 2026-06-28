@@ -57,3 +57,33 @@ similaridades_semanticas = cosine_similarity(embedding_consulta, embeddings_docs
 # Exibe os resultados
 for i, doc in enumerate(documentos):
     print(f"Similaridade semântica entre '{consulta[0]}' e '{doc[:30]}...': {similaridades_semanticas[i]:.4f}")
+
+# --- PARTE 3: VISUALIZAÇÃO 2D (PCA) ---
+print("\n" + "="*50)
+print("3. VISUALIZAÇÃO DOS EMBEDDINGS EM 2D")
+print("="*50)
+
+# Reduz a dimensionalidade dos embeddings para 2D usando PCA
+pca = PCA(n_components=2)
+embeddings_2d = pca.fit_transform(embeddings)
+
+# Cria o gráfico
+plt.figure(figsize=(8, 6))
+labels = ['Consulta (Ataque cardíaco)', 'Doc1 (Infarto)', 'Doc2 (Python)']
+cores = ['red', 'green', 'blue']
+
+for i, (x, y) in enumerate(embeddings_2d):
+    plt.scatter(x, y, c=cores[i], label=labels[i], s=100)
+    plt.annotate(labels[i], (x, y), xytext=(5, 5), textcoords='offset points', fontsize=9)
+
+# Adiciona linhas da consulta para cada documento para visualizar a distância
+consulta_2d = embeddings_2d[0]
+for i, (x, y) in enumerate(embeddings_2d[1:]):
+    plt.plot([consulta_2d[0], x], [consulta_2d[1], y], 'k--', alpha=0.5)
+
+plt.title('Visualização do Espaço Semântico de Embeddings (reduzido com PCA)')
+plt.xlabel('Componente Principal 1')
+plt.ylabel('Componente Principal 2')
+plt.legend()
+plt.grid(True)
+plt.show()
