@@ -36,3 +36,24 @@ similaridades_tfidf = cosine_similarity(vetor_consulta_tfidf, vetores_docs_tfidf
 print("Vocabulário (palavras únicas):", vectorizer_tfidf.get_feature_names_out())
 for i, doc in enumerate(documentos):
     print(f"Similaridade entre '{consulta[0]}' e '{doc[:30]}...': {similaridades_tfidf[i]:.4f}")
+
+# --- PARTE 2: BUSCA SEMÂNTICA (Sentence Transformers) ---
+print("\n" + "="*50)
+print("2. RESULTADOS DA BUSCA SEMÂNTICA (EMBEDDINGS)")
+print("="*50)
+
+# Carrega um modelo pré-treinado de embeddings para sentenças (em português)
+# Vamos usar um modelo multilíngue que funciona bem para PT-BR
+modelo_embedding = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+
+# Gera os embeddings para todos os textos
+embeddings = modelo_embedding.encode(todos_textos)
+embedding_consulta = embeddings[0].reshape(1, -1)
+embeddings_docs = embeddings[1:]
+
+# Calcula a similaridade de cosseno
+similaridades_semanticas = cosine_similarity(embedding_consulta, embeddings_docs).flatten()
+
+# Exibe os resultados
+for i, doc in enumerate(documentos):
+    print(f"Similaridade semântica entre '{consulta[0]}' e '{doc[:30]}...': {similaridades_semanticas[i]:.4f}")
