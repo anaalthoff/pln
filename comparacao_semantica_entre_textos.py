@@ -175,3 +175,157 @@ print("└───────────────────────�
 
 print("\n✓ CONCLUSÃO: SBERT captura similaridade SEMÂNTICA onde TF-IDF falha")
 print("  (sobreposição lexical zero ou baixa)")
+
+# ============================================================
+# PARTE 3: CROSS-ENCODER PARA RERANKING (CORRIGIDO)
+# ============================================================
+print("\n" + "=" * 70)
+print("PARTE 3: Cross-encoder (Alta Precisão - para reranking)")
+print("=" * 70)
+
+# Modelos cross-encoder alternativos disponíveis no Hugging Face
+# Opção 1: Modelo multilíngue treinado em STS (recomendado)
+# Opção 2: Modelo para português (se disponível)
+
+# Vamos usar um modelo multilíngue que suporta português
+# 'cross-encoder/mmarco-mMiniLMv2-L12-H384-v1' é um modelo multilíngue disponível
+# Alternativa: usar um modelo BERT multilíngue fine-tunado para STS
+
+print("\nCarregando cross-encoder (pode levar alguns segundos)...")
+
+# Opção 1: Modelo cross-encoder multilíngue disponível
+# Fonte: https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2
+# (Nota: Este modelo é treinado em inglês, mas podemos usá-lo como exemplo)
+
+# Opção mais segura: usar um modelo de similaridade textual da família sentence-transformers
+# que já é otimizado para STS, mas vamos demonstrar o cross-encoder
+
+# Infelizmente, cross-encoders multilíngues de alta qualidade são raros.
+# Vamos usar uma abordagem alternativa: carregar um modelo BERT multilíngue
+# e adicionar uma camada de classificação (simulando cross-encoder)
+
+from transformers import AutoModel, AutoTokenizer
+import torch.nn as nn
+
+class CrossEncoderForSTS(nn.Module):
+    """Cross-encoder simples para similaridade textual"""
+    def __init__(self, model_name):
+        super().__init__()
+        self.encoder = AutoModel.from_pretrained(model_name)
+        self.classifier = nn.Linear(self.encoder.config.hidden_size, 1)
+        
+    def forward(self, input_ids, attention_mask):
+        outputs = self.encoder(input_ids=input_ids, attention_mask=attention_mask)
+        # Usa o embedding do token [CLS]
+        cls_embedding = outputs.last_hidden_state[:, 0, :]
+        score = self.classifier(cls_embedding)
+        return score
+
+# Carrega modelo BERT multilíngue (base) - suporta português
+model_name = "bert-base-multilingual-cased"
+
+try:
+    # Tenta carregar o cross-encoder alternativo
+    print("Tentando carregar cross-encoder disponível...")
+    
+    # Opção: Usar modelo cross-encoder inglês (funciona para demonstração)
+    # Nota: Este modelo é em inglês, mas demonstra o conceito
+    modelo_cross = AutoModelForSequenceClassification.from_pretrained(
+        "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    )
+    tokenizer_cross = AutoTokenizer.from_pretrained(
+        "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    )
+    print("✓ Cross-encoder carregado! (Modelo: ms-marco-MiniLM-L-6-v2)")
+    
+    # Aviso sobre o idioma
+    print("\n  Nota: Este modelo é otimizado para inglês.")
+    print("  O objetivo é demonstrar o CONCEITO de cross-encoder.")
+    print("  Para português, modelos específicos seriam necessários.\n")
+    
+    modelo_cross.to(device)
+    modelo_cross.eval()
+    
+    # Função para calcular similaridade com cross-encoder (para demonstração)
+    def cross_encoder_score_english(par_frases):
+        """Calcula score de similaridade (0-5) para um par de frases (em inglês)"""
+        # Tradução simples para inglês (apenas para demonstração)
+        traducao = {
+            "O médico operou o paciente.": "The doctor operated on the patient.",
+            "O cirurgião realizou a cirurgia.": "The surgeon performed the surgery.",
+            "O médico não operou o paciente.": "The doctor did not operate on the patient.",
+            "O gato dormiu no sofá.": "The cat slept on the sofa.",
+            "O advogado leu o contrato.": "The lawyer read the contract.",
+        }
+        
+        # Traduz as frases se necessário
+        f1_trad = traducao.get(par_frases[0], par_frases[0])
+        f2_trad = traducao.get(par_frases[1], par_frases[1])
+        
+        inputs = tokenizer_cross(
+            [f1_trad, f2_trad], 
+            return_tensors="pt", 
+            truncation=True, 
+            padding=True,
+            max_length=128
+        )
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+        with torch.no_grad():
+            outputs = modelo_cross(**inputs)
+            logits = outputs.logits.squeeze().cpu().numpy()
+            # Converte logits para escala 0-5 (aproximação)
+            score = (logits[0] if hasattr(logits, '__len__') else logits)
+            score = (score + 5) / 10  # Normalização aproximada
+            score = max(0, min(5, score))
+        return score
+    
+    # Seleciona alguns pares para avaliar
+    pares_para_avaliar = [
+        (frases[0], frases[1], "Paráfrase perfeita (médico ↔ cirurgião)"),
+        (frases[0], frases[7], "Negação (oposto semântico)"),
+        (frases[0], frases[4], "Tópicos diferentes (medicina vs. animal)"),
+    ]
+    
+    print("\nAvaliação com Cross-encoder (escala 0-5, onde 5 = muito similar):")
+    print("  Nota: Demonstração conceitual com modelo em inglês\n")
+    print("-" * 70)
+    
+    for f1, f2, desc in pares_para_avaliar:
+        score = cross_encoder_score_english([f1, f2])
+        print(f"\n{desc}")
+        print(f"  Frase 1: {f1}")
+        print(f"  Frase 2: {f2}")
+        print(f"  Score Cross-encoder: {score:.2f} / 5.0")
+    
+    print("\n✓ O cross-encoder é MAIS PRECISO que o SBERT, porém MAIS LENTO")
+    print("  → Uso típico: SBERT para recuperação, Cross-encoder para reranking")
+    print("  → Para português, modelos fine-tunados em ASSIN 2 seriam ideais")
+
+except Exception as e:
+    print(f"\n⚠ Não foi possível carregar o cross-encoder: {e}")
+    print("\nUsando abordagem alternativa: Demonstração conceitual do cross-encoder")
+    print("-" * 70)
+    
+    # Abordagem alternativa: demonstração conceitual sem carregar modelo
+    print("""
+    ┌─────────────────────────────────────────────────────────────────────────────┐
+    │                    CROSS-ENCODER (CONCEITO)                                 │
+    ├─────────────────────────────────────────────────────────────────────────────┤
+    │                                                                             │
+    │  O cross-encoder é uma arquitetura que processa o PAR de frases JUNTAS,    │
+    │  permitindo que o modelo capture interações profundas entre os tokens.      │
+    │                                                                             │
+    │  Entrada: "[CLS] Frase A [SEP] Frase B [SEP]"                               │
+    │           ↓                                                                 │
+    │        [BERT]                                                               │
+    │           ↓                                                                 │
+    │     Embedding do [CLS] → Camada Linear → Score (ex: 4.2 / 5.0)              │
+    │                                                                             │
+    │  Vantagem: Alta precisão                                                    │
+    │  Desvantagem: Não gera embeddings separados; processamento O(n²)            │
+    │                                                                             │
+    │  Para português, recomenda-se fine-tunar um cross-encoder no corpus ASSIN 2 │
+    │  (Real et al., 2020) disponível em: https://huggingface.co/datasets/assin2  │
+    │                                                                             │
+    └─────────────────────────────────────────────────────────────────────────────┘
+    """)
