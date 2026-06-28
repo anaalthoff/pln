@@ -445,3 +445,58 @@ print("""
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 """)
+
+# ============================================================
+# PARTE 6: APLICAÇÃO EM BUSCA SEMÂNTICA (SIMULAÇÃO)
+# ============================================================
+print("\n" + "=" * 70)
+print("PARTE 6: Simulação de Busca Semântica")
+print("=" * 70)
+
+# Documentos de exemplo
+documentos = [
+    "A empresa reportou um prejuízo de R$ 10 milhões no último trimestre.",
+    "Os lucros da organização aumentaram 20% neste ano.",
+    "A companhia teve perdas significativas no terceiro trimestre fiscal.",
+    "O governo anunciou novas medidas econômicas.",
+    "A firma registrou resultados negativos nos últimos três meses."
+]
+
+# Consulta do usuário
+consulta = "Qual empresa teve prejuízo no último trimestre?"
+
+print(f"Consulta: '{consulta}'")
+print(f"\nDocumentos na coleção ({len(documentos)} documentos):")
+for i, doc in enumerate(documentos):
+    print(f"  D{i+1}: {doc}")
+
+# Gera embeddings para consulta e documentos
+todos_textos = [consulta] + documentos
+embeddings_busca = modelo_sbert.encode(todos_textos, convert_to_numpy=True)
+consulta_emb = embeddings_busca[0]
+docs_emb = embeddings_busca[1:]
+
+# Calcula similaridades
+similaridades_busca = cosine_similarity([consulta_emb], docs_emb)[0]
+
+print("\nResultados da busca semântica (ordenados por relevância):")
+print("-" * 70)
+
+# Ordena documentos por similaridade
+indices_ordenados = np.argsort(similaridades_busca)[::-1]
+
+for rank, idx in enumerate(indices_ordenados):
+    sim = similaridades_busca[idx]
+    doc_texto = documentos[idx]
+    print(f"{rank+1}. Similaridade: {sim:.4f} | Documento: {doc_texto}")
+
+print("\n✓ Análise dos resultados:")
+print("  → Documento D1 ('prejuízo... último trimestre') = ALTA similaridade")
+print("  → Documento D5 ('resultados negativos... últimos três meses') = ALTA similaridade")
+print("  → Documento D3 ('perdas... terceiro trimestre') = MÉDIA similaridade")
+print("  → Documento D2 ('lucros aumentaram') = BAIXA similaridade (sentido oposto)")
+print("  → Documento D4 ('governo') = BAIXA similaridade (tópico diferente)")
+
+print("\n" + "=" * 70)
+print("FIM DO EXEMPLO COMPUTACIONAL")
+print("=" * 70)
