@@ -329,3 +329,119 @@ except Exception as e:
     │                                                                             │
     └─────────────────────────────────────────────────────────────────────────────┘
     """)
+
+# ============================================================
+# PARTE 4: VISUALIZAÇÃO t-SNE
+# ============================================================
+print("\n" + "=" * 70)
+print("PARTE 4: Visualização t-SNE dos Embeddings SBERT")
+print("=" * 70)
+
+# Aplica t-SNE para reduzir para 2D
+perplexity_val = min(5, len(embeddings_sbert) - 1)
+print(f"Aplicando t-SNE (perplexity={perplexity_val})...")
+tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity_val)
+embeddings_2d = tsne.fit_transform(embeddings_sbert)
+
+# Cores para grupos semânticos
+cores = []
+for i in range(len(frases)):
+    if i <= 2:  # Grupo medicina
+        cores.append('#1f77b4')  # azul
+    elif i == 3:  # Direito
+        cores.append('#ff7f0e')  # laranja
+    elif 4 <= i <= 5:  # Animais
+        cores.append('#2ca02c')  # verde
+    elif i == 6:  # Voz passiva (medicina)
+        cores.append('#1f77b4')
+    elif i == 7:  # Negação
+        cores.append('#d62728')  # vermelho
+    else:  # Cirurgia sucesso
+        cores.append('#9467bd')  # roxo
+
+# Tamanhos
+tamanhos = [100] * len(frases)
+
+# Cria o gráfico
+plt.figure(figsize=(14, 10))
+for i, (x, y) in enumerate(embeddings_2d):
+    plt.scatter(x, y, marker='o', color=cores[i], s=tamanhos[i], 
+                alpha=0.7, edgecolors='black', linewidth=1.5)
+    # Adiciona rótulo com número e texto abreviado
+    texto_curto = frases[i][:25] + "..." if len(frases[i]) > 25 else frases[i]
+    plt.text(x + 0.1, y + 0.1, f"{i+1}", fontsize=12, fontweight='bold',
+             bbox=dict(facecolor='white', alpha=0.7, edgecolor='none', pad=1))
+    plt.text(x + 0.1, y - 0.3, texto_curto, fontsize=8, alpha=0.7)
+
+# Adiciona anotações de grupo
+plt.annotate('Grupo 1: Medicina/Cirurgia\n(paráfrases - F1, F2, F3, F7, F9)', 
+             xy=(embeddings_2d[0, 0], embeddings_2d[0, 1]),
+             xytext=(embeddings_2d[0, 0] + 3, embeddings_2d[0, 1] + 3),
+             fontsize=10, style='italic', color='#1f77b4',
+             arrowprops=dict(arrowstyle='->', color='#1f77b4', alpha=0.5))
+
+plt.annotate('Grupo 2: Direito\n(F4 - tópico diferente)', 
+             xy=(embeddings_2d[3, 0], embeddings_2d[3, 1]),
+             xytext=(embeddings_2d[3, 0] + 2, embeddings_2d[3, 1] + 2),
+             fontsize=10, style='italic', color='#ff7f0e',
+             arrowprops=dict(arrowstyle='->', color='#ff7f0e', alpha=0.5))
+
+plt.annotate('Grupo 3: Animais\n(F5, F6 - tópico diferente)', 
+             xy=(embeddings_2d[4, 0], embeddings_2d[4, 1]),
+             xytext=(embeddings_2d[4, 0] + 2, embeddings_2d[4, 1] + 2),
+             fontsize=10, style='italic', color='#2ca02c',
+             arrowprops=dict(arrowstyle='->', color='#2ca02c', alpha=0.5))
+
+plt.annotate('Grupo 4: Negação\n(F8 - sentido oposto)', 
+             xy=(embeddings_2d[7, 0], embeddings_2d[7, 1]),
+             xytext=(embeddings_2d[7, 0] + 2, embeddings_2d[7, 1] - 1.5),
+             fontsize=10, style='italic', color='#d62728',
+             arrowprops=dict(arrowstyle='->', color='#d62728', alpha=0.5))
+
+plt.title("Visualização de Embeddings Semânticos de Frases (SBERT - t-SNE)", 
+          fontsize=14, fontweight='bold')
+plt.xlabel("Dimensão 1 (t-SNE)", fontsize=12)
+plt.ylabel("Dimensão 2 (t-SNE)", fontsize=12)
+plt.grid(True, alpha=0.3, linestyle='--')
+plt.tight_layout()
+plt.show()
+
+print("\n✓ Análise do gráfico t-SNE:")
+print("  → Frases do grupo Medicina/Cirurgia (F1, F2, F3, F7, F9) estão PRÓXIMAS")
+print("  → Frase de Direito (F4) está DISTANTE do grupo Medicina")
+print("  → Frases de Animais (F5, F6) estão DISTANTES dos demais grupos")
+print("  → Frase de Negação (F8) está mais distante das paráfrases positivas")
+
+# ============================================================
+# PARTE 5: INFERÊNCIA TEXTUAL (NLI) CONCEITUAL
+# ============================================================
+print("\n" + "=" * 70)
+print("PARTE 5: Inferência Textual Natural (NLI) - Conceitos")
+print("=" * 70)
+
+print("""
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    INFERÊNCIA TEXTUAL (NLI / RTE)                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Acarretamento (Entailment): Se P é verdadeiro, H é verdadeiro             │
+│  Contradição (Contradiction): P e H não podem ser ambos verdadeiros        │
+│  Neutro (Neutral): Nenhuma relação garantida                               │
+│                                                                             │
+│  Exemplos:                                                                  │
+│                                                                             │
+│  1. ACARRETAMENTO                                                          │
+│     P: "O médico operou o paciente."                                       │
+│     H: "Houve uma cirurgia."                                               │
+│                                                                             │
+│  2. CONTRADIÇÃO                                                            │
+│     P: "O médico operou o paciente."                                       │
+│     H: "O paciente não foi operado."                                       │
+│                                                                             │
+│  3. NEUTRO                                                                  │
+│     P: "O médico operou o paciente."                                       │
+│     H: "O médico usou um bisturi."                                         │
+│     (Possível, mas não garantido pela premissa)                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+""")
