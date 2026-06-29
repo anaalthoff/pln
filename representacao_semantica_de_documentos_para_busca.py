@@ -113,3 +113,45 @@ ranking_semantico = sorted([(i, doc, sim) for i, (doc, sim) in enumerate(zip(doc
                            key=lambda x: x[2], reverse=True)
 for pos, (idx, doc, sim) in enumerate(ranking_semantico, 1):
     print(f"  {pos}. [Doc{idx+1}] Cosseno: {sim:.4f} - {doc[:60]}...")
+
+# ============================================================================
+# 5. BUSCA HÍBRIDA (RECIPROCAL RANK FUSION - RRF)
+# ============================================================================
+
+print("\n" + "=" * 50)
+print("5. BUSCA HÍBRIDA - Reciprocal Rank Fusion (RRF)")
+print("=" * 50)
+
+def reciprocal_rank_fusion(rankings, k=60):
+    """
+    Combina múltiplos rankings usando Reciprocal Rank Fusion (RRF).
+    
+    Args:
+        rankings: Lista de listas, onde cada lista contém os índices dos documentos
+                  em ordem de classificação (do mais relevante para o menos).
+        k: Constante para suavização (tipicamente 60).
+    
+    Returns:
+        Lista de tuplas (índice_do_documento, pontuação_rrf) ordenada por pontuação decrescente.
+    """
+    scores = {}
+    for ranking in rankings:
+        for rank, doc_idx in enumerate(ranking, start=1):
+            if doc_idx not in scores:
+                scores[doc_idx] = 0.0
+            scores[doc_idx] += 1.0 / (k + rank)
+    return sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+# Obtém os rankings individuais (listas de índices, do mais relevante para o menos)
+ranking_tfidf_indices = [idx for idx, _, _ in ranking_tfidf]
+ranking_semantico_indices = [idx for idx, _, _ in ranking_semantico]
+
+print("Ranking TF-IDF (índices):", ranking_tfidf_indices)
+print("Ranking Semântico (índices):", ranking_semantico_indices)
+
+# Aplica RRF
+ranking_hibrido = reciprocal_rank_fusion([ranking_tfidf_indices, ranking_semantico_indices], k=60)
+
+print("\nRanking Híbrido (RRF - combina TF-IDF + Embeddings):")
+for pos, (doc_idx, score) in enumerate(ranking_hibrido, 1):
+    print(f"  {pos}. [Doc{doc_idx+1}] Pontuação RRF: {score:.6f} - {documentos[doc_idx][:60]}...")
