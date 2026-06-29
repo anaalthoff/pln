@@ -83,3 +83,33 @@ ranking_tfidf = sorted([(i, doc, sim) for i, (doc, sim) in enumerate(zip(documen
                        key=lambda x: x[2], reverse=True)
 for pos, (idx, doc, sim) in enumerate(ranking_tfidf, 1):
     print(f"  {pos}. [Doc{idx+1}] Cosseno: {sim:.4f} - {doc[:60]}...")
+
+# ============================================================================
+# 4. ABORDAGEM SEMÂNTICA: EMBEDDINGS (REPRESENTAÇÃO DENSA)
+# ============================================================================
+
+print("\n" + "=" * 50)
+print("4. ABORDAGEM SEMÂNTICA - Sentence Transformers (Vetor Denso)")
+print("=" * 50)
+
+print("Carregando modelo Sentence-BERT multilíngue...")
+print("(Modelo: paraphrase-multilingual-MiniLM-L12-v2)")
+
+modelo = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+
+start_time = time.time()
+embeddings_docs = modelo.encode(documentos, normalize_embeddings=True)
+embedding_consulta = modelo.encode([consulta], normalize_embeddings=True)
+tempo_embedding = time.time() - start_time
+
+similaridades_semanticas = cosine_similarity(embedding_consulta, embeddings_docs).flatten()
+
+print(f"Dimensionalidade do embedding: {embeddings_docs.shape[1]} dimensões")
+print(f"Tipo do vetor: DENSO (todos os {embeddings_docs.shape[1]} elementos são não-zero)")
+print(f"Tempo de geração dos embeddings: {tempo_embedding*1000:.2f} ms\n")
+
+print("Ranking Semântico (por similaridade de cosseno):")
+ranking_semantico = sorted([(i, doc, sim) for i, (doc, sim) in enumerate(zip(documentos, similaridades_semanticas))], 
+                           key=lambda x: x[2], reverse=True)
+for pos, (idx, doc, sim) in enumerate(ranking_semantico, 1):
+    print(f"  {pos}. [Doc{idx+1}] Cosseno: {sim:.4f} - {doc[:60]}...")
