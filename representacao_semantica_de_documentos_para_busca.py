@@ -155,3 +155,33 @@ ranking_hibrido = reciprocal_rank_fusion([ranking_tfidf_indices, ranking_semanti
 print("\nRanking Híbrido (RRF - combina TF-IDF + Embeddings):")
 for pos, (doc_idx, score) in enumerate(ranking_hibrido, 1):
     print(f"  {pos}. [Doc{doc_idx+1}] Pontuação RRF: {score:.6f} - {documentos[doc_idx][:60]}...")
+
+# ============================================================================
+# 6. COMPARAÇÃO DETALHADA ENTRE OS RANKINGS
+# ============================================================================
+
+print("\n" + "=" * 50)
+print("6. COMPARAÇÃO DETALHADA DOS RANKINGS")
+print("=" * 50)
+
+print("\n┌─────────┬──────────────┬──────────────────┬─────────────────┐")
+print("│ Documento│    TF-IDF    │   Embeddings     │    Híbrido      │")
+print("│         │ (posição/score)│ (posição/score)  │ (posição/score) │")
+print("├─────────┼──────────────┼──────────────────┼─────────────────┤")
+
+for doc_idx in range(len(documentos)):
+    # Encontra posição no ranking TF-IDF
+    tfidf_pos = next(pos for pos, (idx, _, _) in enumerate(ranking_tfidf, 1) if idx == doc_idx)
+    tfidf_score = similaridades_tfidf[doc_idx]
+    
+    # Encontra posição no ranking semântico
+    sem_pos = next(pos for pos, (idx, _, _) in enumerate(ranking_semantico, 1) if idx == doc_idx)
+    sem_score = similaridades_semanticas[doc_idx]
+    
+    # Encontra posição no ranking híbrido
+    hibrido_pos = next(pos for pos, (idx, _) in enumerate(ranking_hibrido, 1) if idx == doc_idx)
+    hibrido_score = next(score for idx, score in ranking_hibrido if idx == doc_idx)
+    
+    print(f"│ Doc{doc_idx+1:<6} │ {tfidf_pos} ({tfidf_score:.3f})   │ {sem_pos} ({sem_score:.3f})     │ {hibrido_pos} ({hibrido_score:.4f})    │")
+
+print("└─────────┴──────────────┴──────────────────┴─────────────────┘")
