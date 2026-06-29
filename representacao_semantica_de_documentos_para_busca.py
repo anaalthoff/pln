@@ -236,3 +236,78 @@ ax.set_facecolor('#f8f9fa')
 
 plt.tight_layout()
 plt.show()
+
+# ============================================================================
+# 8. ANÁLISE E INTERPRETAÇÃO DOS RESULTADOS
+# ============================================================================
+
+print("\n" + "=" * 50)
+print("8. ANÁLISE E INTERPRETAÇÃO DOS RESULTADOS")
+print("=" * 50)
+
+print("""
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  OBSERVAÇÕES IMPORTANTES                                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  TF-IDF (Busca por Palavras-chave):                                         │
+│  • Teve bom desempenho para D1 (carro elétrico) e D4 (automóvel elétrico)   │
+│  • FALHOU GRAVEMENTE para D2 (veículo...alcance) - similaridade baixa       │
+│  • Motivo: não reconhece que "veículo" ≈ "automóvel" e "alcance" ≈ autonomia│
+│  • Este é o clássico PROBLEMA DA SINONÍMIA                                   │
+│                                                                             │
+│  Embeddings (Busca Semântica):                                              │
+│  • Excelente desempenho para D2 (subiu de posição 6 para 1)                 │
+│  • Capturou corretamente as relações semânticas entre os termos             │
+│  • D1 permaneceu no topo (bom desempenho em ambas)                          │
+│  • D3 (receita de bolo) corretamente ignorado (similaridade baixa)          │
+│                                                                             │
+│  Híbrido (RRF):                                                             │
+│  • Combinou o melhor dos dois mundos                                        │
+│  • D2 (semanticamente excelente) subiu para posição 2                       │
+│  • D4 (lexicalmente bom, semanticamente médio) manteve posição competitiva  │
+│  • Ranking mais equilibrado para diferentes tipos de consulta               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+""")
+
+# ============================================================================
+# 9. COMPARAÇÃO DE DESEMPENHO
+# ============================================================================
+
+print("\n" + "=" * 50)
+print("9. COMPARAÇÃO DE DESEMPENHO E CARACTERÍSTICAS")
+print("=" * 50)
+
+# Calcula métricas adicionais
+relevantes_tfidf = sum(1 for _, _, sim in ranking_tfidf[:3] if sim > 0.1)
+relevantes_sem = sum(1 for _, _, sim in ranking_semantico[:3] if sim > 0.5)
+relevantes_hibrido = sum(1 for idx, _ in ranking_hibrido[:3] if similaridades_semanticas[idx] > 0.5)
+
+print(f"""
+┌───────────────────────────────┬─────────────────────┬─────────────────────────┐
+│         CARACTERÍSTICA        │      TF-IDF         │    EMBEDDINGS (SBERT)   │
+├───────────────────────────────┼─────────────────────┼─────────────────────────┤
+│ Dimensionalidade              │ {len(vocabulario):>19} │ {embeddings_docs.shape[1]:>23} │
+│ Tipo de Vetor                 │ Esparso             │ Denso                   │
+│ % elementos não-zero          │ {(matriz_tfidf.nnz / (matriz_tfidf.shape[0] * matriz_tfidf.shape[1]) * 100):.2f}%              │ 100.00%                 │
+│ Captura Sinonímia             │ Não                 │ Sim                     │
+│ Captura Contexto              │ Não                 │ Sim                     │
+│ Interpretabilidade            │ Alta (termos)       │ Baixa (vetor opaco)     │
+│ Tempo de Processamento        │ {tempo_tfidf*1000:.1f} ms              │ {tempo_embedding*1000:.1f} ms                │
+│ Documentos relevantes no Top-3│ {relevantes_tfidf} de 3              │ {relevantes_sem} de 3                  │
+└───────────────────────────────┴─────────────────────┴─────────────────────────┘
+
+TEMPOS DE PROCESSAMENTO (para este corpus de 6 documentos):
+- TF-IDF: {tempo_tfidf*1000:.1f} ms
+- Embeddings: {tempo_embedding*1000:.1f} ms
+
+OBSERVAÇÃO IMPORTANTE: 
+- Para grandes coleções (ex: 1 milhão de documentos), a diferença é MAIOR
+- Embeddings: requer GPU e índices aproximados (FAISS) para busca eficiente
+- TF-IDF: índice invertido mantém-se eficiente mesmo em larga escala
+""")
+
+print("\n" + "=" * 70)
+print("FIM DO EXEMPLO COMPUTACIONAL")
+print("=" * 70)
