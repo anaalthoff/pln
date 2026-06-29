@@ -165,9 +165,9 @@ print("6. COMPARAÇÃO DETALHADA DOS RANKINGS")
 print("=" * 50)
 
 print("\n┌─────────┬──────────────┬──────────────────┬─────────────────┐")
-print("│ Documento│    TF-IDF    │   Embeddings     │    Híbrido      │")
-print("│         │ (posição/score)│ (posição/score)  │ (posição/score) │")
-print("├─────────┼──────────────┼──────────────────┼─────────────────┤")
+print("│ Documento │    TF-IDF    │   Embeddings     │    Híbrido      │")
+print("│           │ (posição/score)│ (posição/score)  │ (posição/score) │")
+print("├───────────┼──────────────┼──────────────────┼─────────────────┤")
 
 for doc_idx in range(len(documentos)):
     # Encontra posição no ranking TF-IDF
@@ -185,3 +185,54 @@ for doc_idx in range(len(documentos)):
     print(f"│ Doc{doc_idx+1:<6} │ {tfidf_pos} ({tfidf_score:.3f})   │ {sem_pos} ({sem_score:.3f})     │ {hibrido_pos} ({hibrido_score:.4f})    │")
 
 print("└─────────┴──────────────┴──────────────────┴─────────────────┘")
+
+# ============================================================================
+# 7. VISUALIZAÇÃO 2D DO ESPAÇO SEMÂNTICO (PCA)
+# ============================================================================
+
+print("\n" + "=" * 50)
+print("7. VISUALIZAÇÃO 2D - Espaço Semântico dos Embeddings")
+print("=" * 50)
+
+# Reduz dimensionalidade para 2D com PCA
+pca = PCA(n_components=2)
+embeddings_2d = pca.fit_transform(embeddings_docs)
+consulta_2d = pca.transform(embedding_consulta)
+
+# Cria o gráfico
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Plota documentos
+for i, (x, y) in enumerate(embeddings_2d):
+    # Cor baseada na similaridade semântica com a consulta
+    if similaridades_semanticas[i] > 0.6:
+        cor = '#2ecc71'  # verde escuro - muito relevante
+        tamanho = 200
+    elif similaridades_semanticas[i] > 0.3:
+        cor = '#f39c12'  # laranja - moderadamente relevante
+        tamanho = 160
+    else:
+        cor = '#e74c3c'  # vermelho - irrelevante
+        tamanho = 120
+    
+    ax.scatter(x, y, c=cor, s=tamanho, alpha=0.7, edgecolors='black', linewidth=1.5)
+    ax.annotate(f'D{i+1}\n{similaridades_semanticas[i]:.2f}', 
+                (x, y), xytext=(8, 8), textcoords='offset points', 
+                fontsize=9, fontweight='bold', backgroundcolor='white', 
+                alpha=0.8, bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.7))
+
+# Plota consulta
+ax.scatter(consulta_2d[0, 0], consulta_2d[0, 1], c='#3498db', s=400, marker='*', 
+           label=f'Consulta: "{consulta}"', edgecolors='black', 
+           linewidth=2, zorder=5)
+
+ax.set_title('Espaço Semântico dos Documentos\nRedução PCA (384D → 2D) - Valores indicam similaridade de cosseno', 
+             fontsize=12, fontweight='bold')
+ax.set_xlabel('Componente Principal 1', fontsize=11)
+ax.set_ylabel('Componente Principal 2', fontsize=11)
+ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
+ax.grid(True, alpha=0.3)
+ax.set_facecolor('#f8f9fa')
+
+plt.tight_layout()
+plt.show()
