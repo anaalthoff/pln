@@ -93,3 +93,59 @@ for limiar in limiares:
     print(f"  Revocação: {r:.3f}")
     print(f"  AP: {ap:.3f}")
     print(f"  Precision@1/3/5: {prec_k[1]:.1f}/{prec_k[3]:.1f}/{prec_k[5]:.1f}")
+
+# 7. Visualização da Curva Precisão-Revocação
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+for limiar, p, r, ap in resultados:
+    plt.plot(r, p, 'bo', markersize=8)
+plt.plot([0, 1], [1, 0], 'r--', alpha=0.5, label='Trade-off teórico')
+plt.xlabel('Revocação')
+plt.ylabel('Precisão')
+plt.title('Curva Precisão-Revocação\n(variando o limiar de similaridade)')
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.xlim(-0.05, 1.05)
+plt.ylim(-0.05, 1.05)
+for limiar, p, r, ap in resultados:
+    plt.annotate(f'{limiar:.1f}', (r, p), textcoords="offset points", xytext=(5,5), ha='center')
+plt.legend()
+
+plt.subplot(1, 2, 2)
+limiares_plot, ap_values = zip(*[(l, ap) for l, p, r, ap in resultados])
+plt.bar(range(len(limiares_plot)), ap_values, tick_label=[f'{l:.1f}' for l in limiares_plot])
+plt.xlabel('Limiar de similaridade')
+plt.ylabel('Average Precision (AP)')
+plt.title('AP em função do limiar')
+plt.grid(True, linestyle='--', alpha=0.7)
+
+plt.tight_layout()
+plt.show()
+
+# 8. Visualização em 2D dos embeddings
+from sklearn.decomposition import PCA
+
+embeddings = model.encode(documentos, convert_to_tensor=False)
+consulta_emb = model.encode(consulta, convert_to_tensor=False)
+
+# Reduzir para 2D com PCA
+pca = PCA(n_components=2)
+embeddings_2d = pca.fit_transform(embeddings)
+consulta_2d = pca.transform([consulta_emb])[0]
+
+plt.figure(figsize=(10, 8))
+# Plotar documentos
+for i, (x, y) in enumerate(embeddings_2d):
+    cor = 'green' if relevantes_verdade[i] else 'red'
+    plt.scatter(x, y, c=cor, s=100, edgecolors='black', alpha=0.7)
+    plt.annotate(f'Doc{i}', (x, y), fontsize=9)
+
+# Plotar consulta
+plt.scatter(consulta_2d[0], consulta_2d[1], c='blue', s=200, marker='*', 
+            edgecolors='black', label='Consulta')
+plt.xlabel('Componente Principal 1')
+plt.ylabel('Componente Principal 2')
+plt.title('Visualização dos Embeddings em 2D (PCA)\nVerde=Relevante, Vermelho=Não Relevante')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
