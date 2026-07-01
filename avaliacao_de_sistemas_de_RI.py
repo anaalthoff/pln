@@ -42,3 +42,33 @@ def busca_semantica(consulta, documentos, modelo, limiar):
     
     return indices_recuperados, indices_ordenados, sims_ordenadas
 
+# 5. Função para calcular métricas
+def calcular_metricas(indices_recuperados, indices_ordenados, relevantes_verdade):
+    """Calcula Precisão, Revocação, AP e Precision@K."""
+    # Para precisão/revocação simples (limiar binário)
+    vp = sum(1 for i in indices_recuperados if relevantes_verdade[i])
+    fp = len(indices_recuperados) - vp
+    fn = sum(1 for i, rel in enumerate(relevantes_verdade) if rel and i not in indices_recuperados)
+    
+    precisao = vp / (vp + fp) if (vp + fp) > 0 else 0
+    revocacao = vp / (vp + fn) if (vp + fn) > 0 else 0
+    
+    # Average Precision (AP) - considerando ordenação
+    relevantes_encontrados = 0
+    precisoes_ap = []
+    for pos, idx in enumerate(indices_ordenados, start=1):
+        if relevantes_verdade[idx]:
+            relevantes_encontrados += 1
+            precisao_pos = relevantes_encontrados / pos
+            precisoes_ap.append(precisao_pos)
+    total_relevantes = sum(relevantes_verdade)
+    ap = np.mean(precisoes_ap) if precisoes_ap else 0
+    
+    # Precision@K (K=1,3,5)
+    prec_k = {}
+    for k in [1, 3, 5]:
+        top_k = indices_ordenados[:k]
+        relevantes_top_k = sum(1 for i in top_k if relevantes_verdade[i])
+        prec_k[k] = relevantes_top_k / k
+    
+    return precisao, revocacao, ap, prec_k
