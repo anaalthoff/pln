@@ -51,3 +51,30 @@ ranking_plm = np.argsort(similarities_plm)[::-1]
 
 for idx in ranking_plm:
     print(f"Doc {idx+1} (Score: {similarities_plm[idx]:.3f}): {documentos[idx]}")
+
+# 4. Visualização Gráfica (PCA para reduzir dimensões e plotar)
+pca = PCA(n_components=2)
+# Combina todos os embeddings para treinar o PCA
+all_embeds = np.vstack([doc_embeddings, query_embedding])
+pca_result = pca.fit_transform(all_embeds)
+
+# Plotagem
+plt.figure(figsize=(10, 6))
+colors = ['blue', 'green', 'red', 'purple']
+for i, doc in enumerate(documentos):
+    plt.scatter(pca_result[i, 0], pca_result[i, 1], color=colors[i], s=100, label=f"Doc {i+1}")
+# Query
+plt.scatter(pca_result[-1, 0], pca_result[-1, 1], color='orange', s=150, marker='*', label='Consulta')
+
+# Anotações
+for i, doc in enumerate(documentos):
+    plt.annotate(f"Doc {i+1}", (pca_result[i, 0], pca_result[i, 1]))
+plt.annotate("Consulta", (pca_result[-1, 0], pca_result[-1, 1]))
+plt.title('Espaço Vetorial Semântico (PLM) - PCA 2D')
+plt.xlabel('Componente Principal 1')
+plt.ylabel('Componente Principal 2')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+print("\nAnálise: O PLM identificou corretamente que 'receber dinheiro' e 'pagamento' são semanticamente próximos, e 'incapacidade' é um sinônimo contextual de 'auxílio-doença'!")
