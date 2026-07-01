@@ -34,3 +34,20 @@ for idx in ranking_tfidf:
     print(f"Doc {idx+1} (Score: {similarities_tfidf[idx]:.3f}): {documentos[idx]}")
     if idx == 0:
         print(" [ALERTA] FALHA: O documento mais relevante tem baixa similaridade lexical!\n")
+
+# 3. Modelo PLM (Sentence-BERT - Contextual)
+print("\n=== Resultados da Busca PLM (Semântica) ===")
+# Carrega um modelo multilíngue otimizado para similaridade semântica
+# (Exemplos: 'paraphrase-multilingual-MiniLM-L12-v2', 'distiluse-base-multilingual-cased')
+model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+
+# Gera embeddings
+doc_embeddings = model.encode(documentos)
+query_embedding = model.encode([consulta])
+
+# Calcula similaridade de cosseno
+similarities_plm = cosine_similarity(query_embedding, doc_embeddings).flatten()
+ranking_plm = np.argsort(similarities_plm)[::-1]
+
+for idx in ranking_plm:
+    print(f"Doc {idx+1} (Score: {similarities_plm[idx]:.3f}): {documentos[idx]}")
