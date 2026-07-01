@@ -72,3 +72,24 @@ def calcular_metricas(indices_recuperados, indices_ordenados, relevantes_verdade
         prec_k[k] = relevantes_top_k / k
     
     return precisao, revocacao, ap, prec_k
+
+# 6. Executar para diferentes limiares
+consulta = "redes neurais convolucionais"
+limiares = np.arange(0.1, 0.9, 0.1)
+resultados = []
+
+print("=" * 60)
+print(f"Consulta: '{consulta}'")
+print("=" * 60)
+
+for limiar in limiares:
+    rec, ordenados, sims = busca_semantica(consulta, documentos, model, limiar)
+    p, r, ap, prec_k = calcular_metricas(rec, ordenados, relevantes_verdade)
+    resultados.append((limiar, p, r, ap))
+    
+    print(f"\nLimiar = {limiar:.1f}")
+    print(f"  Documentos recuperados: {rec}")
+    print(f"  Precisão: {p:.3f}")
+    print(f"  Revocação: {r:.3f}")
+    print(f"  AP: {ap:.3f}")
+    print(f"  Precision@1/3/5: {prec_k[1]:.1f}/{prec_k[3]:.1f}/{prec_k[5]:.1f}")
